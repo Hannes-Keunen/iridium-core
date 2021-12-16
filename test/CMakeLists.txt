@@ -1,0 +1,6 @@
+project(iridium-core-tests)
+file(GLOB TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+add_executable(${PROJECT_NAME} ${TEST_SRC})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PUBLIC iridium-core)
+target_link_libraries(${PROJECT_NAME} PUBLIC Catch2::Catch2)
