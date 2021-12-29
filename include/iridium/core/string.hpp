@@ -20,9 +20,37 @@ namespace ir
             return std::strong_ordering::greater;
     }
 
-    constexpr std::strong_ordering compare(const char* lhs, const char* rhs)
+    constexpr std::strong_ordering compare(const char* lbegin, const char* lend, const char* rbegin, const char* rend)
     {
-        return to_ordering(std::strcmp(lhs, rhs));
+        while (lbegin != lend && rbegin != rend)
+        {
+            if (*lbegin < *rbegin)
+            {
+                return std::strong_ordering::less;
+            }
+            else if (*lbegin > *rbegin)
+            {
+                return std::strong_ordering::greater;
+            }
+            else
+            {
+                ++lbegin;
+                ++rbegin;
+            }
+        }
+
+        if (lbegin == lend && rbegin == rend)
+        {
+            return std::strong_ordering::equal;
+        }
+        else if (lbegin == lend)
+        {
+            return std::strong_ordering::less;
+        }
+        else
+        {
+            return std::strong_ordering::greater;
+        }
     }
 
     class StringView;
@@ -80,30 +108,15 @@ namespace ir
             _end = _begin + str.size();
         }
 
-        constexpr std::strong_ordering operator<=>(const StringView& rhs) const { return compare(data(), rhs.data()); }
-        constexpr bool operator==(const StringView& rhs) const { return compare(data(), rhs.data()) == std::strong_ordering::equal; };
+        constexpr std::strong_ordering operator<=>(const StringView& rhs) const { return compare(begin(), end(), rhs.begin(), rhs.end()); }
+        constexpr bool operator==(const StringView& rhs) const { return compare(begin(), end(), rhs.begin(), rhs.end()) == std::strong_ordering::equal; };
         constexpr bool operator!=(const StringView& rhs) const = default;
         constexpr bool operator<(const StringView& rhs) const = default;
         constexpr bool operator>(const StringView& rhs) const = default;
         constexpr bool operator<=(const StringView& rhs) const = default;
         constexpr bool operator>=(const StringView& rhs) const = default;
 
-        constexpr auto find(char s, char* from) const -> const char*
-        {
-            for (auto c = begin(); c < end(); ++c)
-            {
-                if (*c == s)
-                {
-                    return c;
-                }
-            }
-            return end();
-        }
-
-        constexpr auto substr(const char* from, const char* to) -> StringView
-        {
-            return StringView(from, to);
-        }
+        constexpr char operator[](int i) const { return begin()[i]; }
 
         auto take() -> String
         {
@@ -122,6 +135,34 @@ namespace ir
 
     constexpr std::strong_ordering operator<=>(const String& lhs, const StringView& rhs) { return StringView(lhs) <=> rhs; };
     constexpr bool operator==(const String& lhs, const StringView& rhs) { return StringView(lhs) == rhs; };
+
+    namespace str
+    {
+        template <typename S>
+        constexpr auto find(const S& str, char s, const char* from) -> const char*
+        {
+            for (auto c = from; c < str.end(); ++c)
+            {
+                if (*c == s)
+                {
+                    return c;
+                }
+            }
+            return str.end();
+        }
+
+        template <typename S>
+        constexpr auto find(const S& str, char s) -> const char*
+        {
+            return find(str, s, str.begin());
+        }
+
+        constexpr auto sub(const char* from, const char* to) -> StringView
+        {
+            return StringView(from, to);
+        }
+
+    } // namespace str
 
 } // namespace ir
 
