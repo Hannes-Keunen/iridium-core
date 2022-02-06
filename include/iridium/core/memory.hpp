@@ -1,7 +1,5 @@
 #pragma once
 
-#include "iridium/core/log.hpp"
-
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
@@ -94,7 +92,6 @@ namespace ir
             if (ref != nullptr)
             {
                 --ref->count;
-                log::d("Ref", fmt::format("refcount = {:d}", ref->count));
                 if (ref->count == 0)
                 {
                     ref->value.~T();
